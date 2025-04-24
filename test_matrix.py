@@ -2,40 +2,38 @@
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image, ImageDraw
 
-# --- 패널 해상도에 맞춰 조정하세요 ---
-WIDTH  = 64    # 컬럼 수
-HEIGHT = 32    # 행 수
-# -----------------------------------
+# 패널 해상도 (예: 64×32)
+WIDTH  = 64
+HEIGHT = 32
 
 # 1) 옵션 설정
 options = RGBMatrixOptions()
 options.rows         = HEIGHT
 options.cols         = WIDTH
-options.chain_length = 1      # 패널을 체인으로 연결했으면 그 수
-options.parallel     = 1      # 병렬로 묶었다면 그 수
-options.hardware_mapping = 'regular'  # 보통 'adafruit-hat' 쓰는 분들도 많습니다
-options.gpio_slowdown    = 2  # 속도 조절 (깜빡임이 심하면 1→4 사이 조정)
-+options.disable_hardware_pulse = True    # ← 이 한 줄을 추가!
+options.chain_length = 1
+options.parallel     = 1
+options.hardware_mapping = 'regular'
+options.gpio_slowdown    = 2
+options.disable_hardware_pulse = True    # 하드웨어 펄스 비활성화
 
 # 2) 매트릭스 초기화
 matrix = RGBMatrix(options=options)
 
-# 3) 출력할 이미지를 만듭니다
-#    - 예제로 빨강/초록/파랑 세 영역을 채워 봅니다
+# 3) 이미지 생성 (빨강/초록/파랑 테스트)
 im = Image.new("RGB", (WIDTH, HEIGHT))
 draw = ImageDraw.Draw(im)
-draw.rectangle((0,0, WIDTH//3,   HEIGHT), fill=(255,  0,  0))  # 왼쪽 1/3: 빨강
-draw.rectangle((WIDTH//3,0, 2*WIDTH//3, HEIGHT), fill=(  0,255,  0))  # 중간 1/3: 초록
-draw.rectangle((2*WIDTH//3,0, WIDTH, HEIGHT), fill=(  0,  0,255))  # 오른쪽 1/3: 파랑
+draw.rectangle((0,0, WIDTH//3,   HEIGHT), fill=(255,  0,  0))
+draw.rectangle((WIDTH//3,0, 2*WIDTH//3, HEIGHT), fill=(  0,255,  0))
+draw.rectangle((2*WIDTH//3,0, WIDTH, HEIGHT), fill=(  0,  0,255))
 
-# 4) 매트릭스에 뿌리기
-matrix.SetImage(im.convert('RGB'))
+# 4) 디스플레이
+matrix.SetImage(im)
 
-# 5) 프로그램이 종료되지 않도록 대기
-print("빨강·초록·파랑 출력 중… Ctrl+C 로 종료")
+# 5) 종료 대기
+print("컬러 바 테스트 중… Ctrl+C 로 종료")
 try:
     while True:
         pass
 except KeyboardInterrupt:
     matrix.Clear()
-    print("\n클리어하고 종료합니다.")
+    print("종료하고 클리어했습니다.")
