@@ -10,6 +10,7 @@ options.chain_length   = 3       # 가로로 연결된 패널 수
 options.parallel       = 2       # 세로로 연결된 패널 수
 options.brightness     = 80      # 밝기 (0–100)
 options.hardware_mapping = 'regular'  
++options.disable_hardware_pulse = True    # ← 이 줄 추가
 #  → HAT/Bonnet 쓰면 'adafruit-hat' 로 변경
 
 # ─── 2. 매트릭스 객체 생성 ──────────────────────────────────
