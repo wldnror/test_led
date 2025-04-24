@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import time
+import os
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 
 # 1) 매트릭스 옵션 설정
 options = RGBMatrixOptions()
-options.drop_privileges         = False                 # root 권한 유지
-options.disable_hardware_pulsing = True                 # 하드웨어 펄스 비활성화  [oai_citation:0‡Adafruit Forums](https://forums.adafruit.com/viewtopic.php?t=155192&utm_source=chatgpt.com)
+options.drop_privileges          = False   # root 권한 유지
+options.disable_hardware_pulsing = True    # 하드웨어 펄스 비활성화
 
 options.rows          = 40     # 단일 패널 세로 픽셀 수
 options.cols          = 80     # 단일 패널 가로 픽셀 수
@@ -19,8 +20,12 @@ matrix = RGBMatrix(options=options)
 canvas = matrix.CreateFrameCanvas()
 
 # 3) 폰트 로드
+# → 홈 디렉터리와 클론한 rpi-rgb-led-matrix 경로에 맞춰 수정하세요
+FONT_PATH = "/home/user/rpi-rgb-led-matrix/fonts/7x13.bdf"
+if not os.path.isfile(FONT_PATH):
+    raise FileNotFoundError(f"Font file not found: {FONT_PATH}")
 font = graphics.Font()
-font.LoadFont("/home/pi/rpi-rgb-led-matrix/fonts/7x13.bdf")  # 필요시 경로 수정
+font.LoadFont(FONT_PATH)
 color = graphics.Color(255, 255, 255)  # 흰색
 
 # 4) 스크롤할 메시지 및 초기 위치
@@ -38,6 +43,6 @@ try:
         if pos + text_length < 0:
             pos = canvas.width
 
-        time.sleep(0.03)  # 속도 조절
+        time.sleep(0.03)  # 스크롤 속도 조절
 except KeyboardInterrupt:
     matrix.Clear()
