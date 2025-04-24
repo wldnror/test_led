@@ -1,42 +1,31 @@
 #!/usr/bin/env python3
-import subprocess
-import time
-from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
+from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from time import sleep
 
-# ──── 매트릭스 설정 ────
+# ─── 1. 매트릭스 옵션 설정 ──────────────────────────────────
 options = RGBMatrixOptions()
-options.rows = 64       # 패널 세로 픽셀
-options.cols = 80       # 패널 가로 픽셀
-options.chain_length = 3  # 가로로 패널 3장
-options.parallel = 2      # 세로로 패널 2장
-options.hardware_mapping = 'regular'  # 배선 직접 결선 시
+options.rows           = 40      # 패널 높이 (픽셀)
+options.cols           = 80      # 패널 너비 (픽셀)
+options.chain_length   = 3       # 가로로 연결된 패널 수
+options.parallel       = 2       # 세로로 연결된 패널 수
+options.brightness     = 80      # 밝기 (0–100)
+options.hardware_mapping = 'regular'  
+#  → HAT/Bonnet 쓰면 'adafruit-hat' 로 변경
+
+# ─── 2. 매트릭스 객체 생성 ──────────────────────────────────
 matrix = RGBMatrix(options=options)
 
-canvas = matrix.CreateFrameCanvas()
-font = graphics.Font()
-font.LoadFont("../../../fonts/7x13.bdf")
-text_color = graphics.Color(255, 255, 0)  # 노란색
+# ─── 3. 컬러 풀스크린 테스트 루프 ───────────────────────────
+try:
+    while True:
+        matrix.Fill(255, 0, 0)   # 빨강
+        sleep(1)
+        matrix.Fill(0, 255, 0)   # 초록
+        sleep(1)
+        matrix.Fill(0, 0, 255)   # 파랑
+        sleep(1)
+        matrix.Clear()           # 화면 지우기
+        sleep(1)
 
-def scroll_text(msg, speed=0.05):
-    pos = canvas.width
-    length = graphics.DrawText(canvas, font, pos, 20, text_color, msg)
-    while pos + length > 0:
-        canvas.Clear()
-        graphics.DrawText(canvas, font, pos, 20, text_color, msg)
-        canvas = matrix.SwapOnVSync(canvas)
-        pos -= 1
-        time.sleep(speed)
-    matrix.Clear()
-
-def speak(msg, lang='ko'):
-    # espeak-ng 예제 (한글은 음질이 다소 기계적)
-    # 한글 대신 영어라면 '-v en' 옵션
-    cmd = ['espeak-ng', f'-v {lang}', msg]
-    subprocess.Popen(cmd)
-
-if __name__ == "__main__":
-    message = "안녕하세요! 전광판과 TTS 기능입니다."
-    # 1) 음성 출력
-    speak(message, lang='ko')  
-    # 2) 텍스트 스크롤
-    scroll_text(message)
+except KeyboardInterrupt:
+    matrix.Clear()             # Ctrl+C 로 종료 시 화면 클리어
