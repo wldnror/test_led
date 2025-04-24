@@ -1,55 +1,40 @@
 #!/usr/bin/env python3
-import time
-import os
-from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
+from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from PIL import Image, ImageDraw
 
-# 실행 중 UID 출력 (0이면 루트)
-print("🔍 Effective UID:", os.geteuid())
+# --- 패널 해상도에 맞춰 조정하세요 ---
+WIDTH  = 64    # 컬럼 수
+HEIGHT = 32    # 행 수
+# -----------------------------------
 
-# 1) 매트릭스 옵션 설정
+# 1) 옵션 설정
 options = RGBMatrixOptions()
+options.rows         = HEIGHT
+options.cols         = WIDTH
+options.chain_length = 1      # 패널을 체인으로 연결했으면 그 수
+options.parallel     = 1      # 병렬로 묶었다면 그 수
+options.hardware_mapping = 'regular'  # 보통 'adafruit-hat' 쓰는 분들도 많습니다
+options.gpio_slowdown    = 2  # 속도 조절 (깜빡임이 심하면 1→4 사이 조정)
 
-# ✅ 루트 권한 유지 및 하드웨어 펄스 비활성화 설정
-options.drop_privileges = False
-options.disable_hardware_pulsing = True
-
-# ✅ 패널 구성 설정 (P4 패널 기준 80x40)
-options.rows = 40                # 한 패널의 세로 픽셀 수
-options.cols = 80                # 한 패널의 가로 픽셀 수
-options.chain_length = 3         # 가로로 연결된 패널 수
-options.parallel = 2             # 세로로 연결된 패널 수
-options.brightness = 80          # 밝기 (1~100)
-options.hardware_mapping = 'regular'  # 직접 배선 시 'regular'
-
-# 2) 매트릭스 및 캔버스 생성
+# 2) 매트릭스 초기화
 matrix = RGBMatrix(options=options)
-canvas = matrix.CreateFrameCanvas()
 
-# 3) 폰트 로드
-FONT_PATH = "/home/user/rpi-rgb-led-matrix/fonts/7x13.bdf"  # 사용자 경로 맞게 수정
-if not os.path.exists(FONT_PATH):
-    raise FileNotFoundError(f"❌ 폰트 파일 없음: {FONT_PATH}")
-font = graphics.Font()
-font.LoadFont(FONT_PATH)
+# 3) 출력할 이미지를 만듭니다
+#    - 예제로 빨강/초록/파랑 세 영역을 채워 봅니다
+im = Image.new("RGB", (WIDTH, HEIGHT))
+draw = ImageDraw.Draw(im)
+draw.rectangle((0,0, WIDTH//3,   HEIGHT), fill=(255,  0,  0))  # 왼쪽 1/3: 빨강
+draw.rectangle((WIDTH//3,0, 2*WIDTH//3, HEIGHT), fill=(  0,255,  0))  # 중간 1/3: 초록
+draw.rectangle((2*WIDTH//3,0, WIDTH, HEIGHT), fill=(  0,  0,255))  # 오른쪽 1/3: 파랑
 
-color = graphics.Color(255, 255, 255)  # 흰색
+# 4) 매트릭스에 뿌리기
+matrix.SetImage(im.convert('RGB'))
 
-# 4) 스크롤할 메시지 및 초기 위치
-message = "Hello, LED Matrix!"
-pos = canvas.width
-
-# 5) 메인 루프
+# 5) 프로그램이 종료되지 않도록 대기
+print("빨강·초록·파랑 출력 중… Ctrl+C 로 종료")
 try:
     while True:
-        canvas.Clear()
-        text_len = graphics.DrawText(canvas, font, pos, 30, color, message)
-        canvas = matrix.SwapOnVSync(canvas)
-
-        pos -= 1
-        if pos + text_len < 0:
-            pos = canvas.width
-
-        time.sleep(0.03)  # 스크롤 속도 조절
+        pass
 except KeyboardInterrupt:
     matrix.Clear()
-    print("🛑 종료되었습니다.")
+    print("\n클리어하고 종료합니다.")
