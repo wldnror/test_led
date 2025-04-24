@@ -15,6 +15,7 @@ options.chain_length = 1      # 패널을 체인으로 연결했으면 그 수
 options.parallel     = 1      # 병렬로 묶었다면 그 수
 options.hardware_mapping = 'regular'  # 보통 'adafruit-hat' 쓰는 분들도 많습니다
 options.gpio_slowdown    = 2  # 속도 조절 (깜빡임이 심하면 1→4 사이 조정)
++options.disable_hardware_pulse = True    # ← 이 한 줄을 추가!
 
 # 2) 매트릭스 초기화
 matrix = RGBMatrix(options=options)
